@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+ * Copyright (c) delight.im <info@delight.im>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<script src="../src/AbstractStorage.js"></script>
+	<script>
+		console.log("Starting ...");
+
+		var storage = new AbstractStorage();
+		// or
+		// var storage = new AbstractStorage(window.localStorage);
+		// or
+		// var storage = new AbstractStorage(window.sessionStorage);
+		console.assert(storage instanceof AbstractStorage, "Instances must be created using the constructor");
+
+		console.assert(storage.count() === 0, "The storage should initially be empty");
+
+		storage.setString("name", "John Doe");
+		console.assert(storage.count() === 1, "The storage should contain as many elements as unique keys have been added");
+
+		storage.setString("age", "25");
+		console.assert(storage.count() === 2, "The storage should contain as many elements as unique keys have been added");
+
+		storage.setString("name", "Jane Doe");
+		console.assert(storage.count() === 2, "The storage should contain as many elements as unique keys have been added");
+
+		storage.remove("age");
+		console.assert(storage.count() === 1, "The storage should contain less elements after removing some");
+
+		storage.remove("address");
+		console.assert(storage.count() === 1, "The storage should contain less elements after removing some");
+
+		console.assert(storage.getString("name") === "Jane Doe", "Existing keys cause their value to be returned");
+		console.assert(storage.getString("name", "John Doe") === "Jane Doe", "Existing keys cause their value to be returned");
+
+		console.assert(storage.getString("firstName", "Jane") === "Jane", "Non-existent keys cause the default value or `null` to be returned");
+		console.assert(storage.getString("firstName", "5") === "5", "Non-existent keys cause the default value or `null` to be returned");
+		console.assert(storage.getString("firstName") === null, "Non-existent keys cause the default value or `null` to be returned");
+
+		storage.setObject("people", [
+			"Alice",
+			"Bob",
+			"Eve"
+		]);
+		storage.setObject("relationships", {
+			"Alice": {
+				"Alice": 1,
+				"Bob": 0,
+				"Eve": 1
+			},
+			"Bob": {
+				"Alice": 1,
+				"Bob": 1,
+				"Eve": 1
+			},
+			"Eve": {
+				"Alice": 0,
+				"Bob": 1,
+				"Eve": 1
+			}
+		});
+		console.assert(storage.count() === 3, "Objects can be added to the storage as well");
+
+		console.assert(storage.getString("people") === "[\"Alice\",\"Bob\",\"Eve\"]", "Objects can be retrieved either as stringified JSON or as the expected objects");
+		console.assert(storage.getObject("people").length === 3, "Objects can be retrieved either as stringified JSON or as the expected objects");
+		console.assert(storage.getString("relationships") === "{\"Alice\":{\"Alice\":1,\"Bob\":0,\"Eve\":1},\"Bob\":{\"Alice\":1,\"Bob\":1,\"Eve\":1},\"Eve\":{\"Alice\":0,\"Bob\":1,\"Eve\":1}}", "Objects can be retrieved either as stringified JSON or as the expected objects");
+		console.assert(Object.keys(storage.getObject("relationships")).length === 3, "Objects can be retrieved either as stringified JSON or as the expected objects");
+
+		storage.clear();
+		console.assert(storage.count() === 0, "The storage should be empty after clearing it");
+
+		console.log("Finished");
+	</script>
+</body>
+</html>
